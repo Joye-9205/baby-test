@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3-4岁幼儿潜力深度测评</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { --primary: #FF7675; --secondary: #74B9FF; --bg: #FFF9F0; }
+        body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #2D3436; }
+        
+        /* 验证层：强制最高层级 */
+        #auth-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #FF7675; z-index: 99999; 
+            display: flex; align-items: center; justify-content: center;
+        }
+        .auth-box { 
+            background: white; padding: 30px; border-radius: 20px; 
+            width: 85%; max-width: 320px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .auth-box input { 
+            width: 100%; padding: 15px; border: 2px solid #eee; 
+            border-radius: 10px; margin: 20px 0; font-size: 20px; 
+            text-align: center; box-sizing: border-box;
+        }
+        .auth-box button { 
+            width: 100%; padding: 15px; background: #FF7675; 
+            color: white; border: none; border-radius: 10px; 
+            font-size: 18px; font-weight: bold; cursor: pointer;
+        }
+
+        /* 主容器 */
+        #main-content { display: none; max-width: 700px; margin: auto; background: white; padding: 25px; border-radius: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        h1 { text-align: center; color: var(--primary); margin-bottom: 25px; font-size: 22px; }
+
+        /* 题目样式 */
+        .question { margin-bottom: 20px; padding: 18px; border-radius: 15px; background: #FAFAFA; border: 1px solid #EEE; }
+        .question p { font-weight: bold; margin-bottom: 12px; font-size: 15px; }
+        .options label { display: block; margin: 8px 0; padding: 12px; border: 2px solid #F1F2F6; border-radius: 10px; background: #FFF; font-size: 14px; cursor: pointer; }
+        input[type="radio"] { margin-right: 10px; }
+
+        .btn-submit { width: 100%; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 15px; font-size: 18px; font-weight: bold; margin-top: 20px; cursor: pointer; }
+
+        /* 报告区域 */
+        #report { display: none; margin-top: 30px; border-top: 2px dashed #EEE; padding-top: 30px; }
+        .talent-tag { display: inline-block; background: var(--primary); color: white; padding: 10px; border-radius: 50px; font-size: 20px; width: 100%; text-align: center; margin-bottom: 20px; font-weight: bold; }
+        .image-box { width: 100%; height: 220px; border-radius: 20px; overflow: hidden; margin-bottom: 25px; border: 1px solid #EEE; }
+        .image-box img { width: 100%; height: 100%; object-fit: cover; }
+        .chart-card { background: #FFF; border-radius: 20px; padding: 15px; border: 1px solid #EEE; margin-bottom: 20px; }
+        .chart-title { font-weight: bold; color: #666; margin-bottom: 10px; font-size: 14px; text-align: center; }
+        
+        .detail-box { background: #F8F9FA; padding: 20px; border-radius: 20px; font-size: 14px; line-height: 1.8; }
+    </style>
+</head>
+<body>
+
+<div id="auth-overlay">
+    <div class="auth-box">
+        <h2 style="margin:0; color:#FF7675;">输入验证码</h2>
+        <p style="color:#999; font-size:13px; margin-top:8px;">请输入 8888 开启测评</p>
+        <input type="number" id="auth-input" placeholder="请输入4位验证码">
+        <button id="auth-btn">进入系统</button>
+        <p id="auth-error" style="color:red; font-size:12px; margin-top:10px; display:none;">验证码错误，请重试</p>
+    </div>
+</div>
+
+<div id="main-content">
+    <h1>🌱 3-4岁幼儿潜力深度测评</h1>
+    <form id="quizForm"><div id="questions-container"></div></form>
+    <button class="btn-submit" onclick="generateReport()">生成深度分析报告</button>
+
+    <div id="report">
+        <div class="talent-tag" id="res-title"></div>
+        <div class="image-box" id="res-img"></div>
+        
+        <div class="chart-card">
+            <div class="chart-title">📊 天赋分布图</div>
+            <canvas id="radarChart"></canvas>
+        </div>
+
+        <div class="chart-card" style="height: 450px;">
+            <div class="chart-title">📈 各项天赋分析</div>
+            <canvas id="barChart"></canvas>
+        </div>
+
+        <div class="detail-box">
+            <p><b>🌟 核心特质：</b><br><span id="res-desc"></span></p>
+            <p><b>💡 培养建议：</b><br><span id="res-advice"></span></p>
+        </div>
+        <button class="btn-submit" style="background:#636E72;" onclick="window.print()">打印/保存报告</button>
+    </div>
+</div>
+
+<script>
+// 1. 验证逻辑 (修正版)
+const CORRECT_CODE = "8888";
+const authBtn = document.getElementById('auth-btn');
+
+authBtn.addEventListener('click', function() {
+    const val = document.getElementById('auth-input').value;
+    if (val === CORRECT_CODE) {
+        document.getElementById('auth-overlay').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+        try { localStorage.setItem('is_verified', 'true'); } catch(e) {}
+    } else {
+        const err = document.getElementById('auth-error');
+        err.style.display = 'block';
+        setTimeout(() => { err.style.display = 'none'; }, 2000);
+    }
+});
+
+// 检查持久化登录
+if (localStorage.getItem('is_verified') === 'true') {
+    document.getElementById('auth-overlay').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+}
+
+// 2. 30道深度题库
+const qData = [
+    {q:"独自玩耍时最常见的状态是？", opts:[{t:"跟玩偶演戏说话",v:"linguistic"},{t:"拆解研究玩具结构",v:"logical"},{t:"专注涂鸦或绘本",v:"spatial"}]},
+    {q:"听到快节奏音乐时的反应？", opts:[{t:"寻找声音来源",v:"musical"},{t:"手舞足蹈跳动",v:"kinesthetic"},{t:"模仿歌词发音",v:"linguistic"}]},
+    {q:"在公园路口迷路时孩子会？", opts:[{t:"指出回家的路",v:"spatial"},{t:"观察昆虫花朵",v:"natural"},{t:"找小朋友玩",v:"interpersonal"}]},
+    {q:"想吃某种水果时如何表达？", opts:[{t:"形容颜色味道",v:"linguistic"},{t:"拉你去果篮指认",v:"kinesthetic"},{t:"讲理由说服你",v:"logical"}]},
+    {q:"积木倒塌后的反应？", opts:[{t:"默默重搭",v:"intrapersonal"},{t:"呼唤家长帮忙",v:"interpersonal"},{t:"检查为什么倒",v:"logical"}]},
+    {q:"对家中物品变动的反应？", opts:[{t:"一眼发现指出来",v:"spatial"},{t:"只看自己东西在不在",v:"logical"},{t:"表现出焦虑感",v:"intrapersonal"}]},
+    {q:"涂鸦完之后的行为？", opts:[{t:"解释画里的故事",v:"linguistic"},{t:"说像什么具体形状",v:"spatial"},{t:"享受笔划在纸上的力道",v:"kinesthetic"}]},
+    {q:"模仿大人扫地或打电话？", opts:[{t:"动作协调准确",v:"kinesthetic"},{t:"表情神态模仿极像",v:"interpersonal"},{t:"关注使用的顺序",v:"logical"}]},
+    {q:"在沙坑或玩水时的表现？", opts:[{t:"观察触感和细节",v:"natural"},{t:"重复接水倒水实验",v:"logical"},{t:"尝试做出造型",v:"spatial"}]},
+    {q:"听到特殊声音的反应？", opts:[{t:"能哼出节奏旋律",v:"musical"},{t:"分辨是哪种动物",v:"natural"},{t:"记住新词汇",v:"linguistic"}]},
+    {q:"整理玩具时的习惯？", opts:[{t:"按分类摆放",v:"logical"},{t:"必须放在特定位置",v:"intrapersonal"},{t:"邀你一起整理讨论",v:"interpersonal"}]},
+    {q:"到新游乐场的表现？", opts:[{t:"主动找小伙伴",v:"interpersonal"},{t:"直奔大型器械",v:"kinesthetic"},{t:"在旁观察确定安全",v:"intrapersonal"}]},
+    {q:"对数字或数量的反应？", opts:[{t:"爱念电梯数字",v:"logical"},{t:"随旋律数数",v:"musical"},{t:"一眼看出谁的糖多",v:"spatial"}]},
+    {q:"分享今天发生的事时？", opts:[{t:"情节清晰连贯",v:"linguistic"},{t:"观察大人脸色反应",v:"interpersonal"},{t:"手舞足蹈演示",v:"kinesthetic"}]},
+    {q:"对下雨或小蚂蚁的态度？", opts:[{t:"共情想去照顾",v:"natural"},{t:"问为什么会下雨",v:"logical"},{t:"给蚂蚁起名字",v:"linguistic"}]},
+    {q:"玩磁力片或拼图时？", opts:[{t:"三维构思能力强",v:"spatial"},{t:"先分类再拼装",v:"logical"},{t:"喜欢推倒的感觉",v:"kinesthetic"}]},
+    {q:"遇到重复规律时的反应？", opts:[{t:"发现规律并尝试接龙",v:"logical"},{t:"对重复旋律着迷",v:"musical"},{t:"必须维持仪式感",v:"intrapersonal"}]},
+    {q:"穿衣服时的表现？", opts:[{t:"协调性好爱自己穿",v:"kinesthetic"},{t:"对颜色图案很挑剔",v:"spatial"},{t:"只穿特定的衣服",v:"intrapersonal"}]},
+    {q:"看动画片最关注？", opts:[{t:"儿歌配乐",v:"musical"},{t:"角色的对话语调",v:"linguistic"},{t:"出现的各种生物",v:"natural"}]},
+    {q:"失败后的第一反应？", opts:[{t:"倔强独自反复练",v:"intrapersonal"},{t:"寻找家长安慰支持",v:"interpersonal"},{t:"笑笑继续跑跳",v:"kinesthetic"}]},
+    {q:"对声音大小强弱的敏感度？", opts:[{t:"能跟着节奏打拍子",v:"musical"},{t:"好奇发声的原理",v:"logical"},{t:"通过声音定位物品",v:"spatial"}]},
+    {q:"分发零食或水果时？", opts:[{t:"知道每个人爱吃啥",v:"interpersonal"},{t:"按个数公平分配",v:"logical"},{t:"给每个水果编故事",v:"linguistic"}]},
+    {q:"看到影子的反应？", opts:[{t:"研究影子的长短形状",v:"spatial"},{t:"跳起来踩影子玩",v:"kinesthetic"},{t:"问太阳去哪里的逻辑",v:"logical"}]},
+    {q:"穿上新鞋子后？", opts:[{t:"立刻跳跃测试弹性",v:"kinesthetic"},{t:"低头研究鞋底花纹",v:"spatial"},{t:"去展示给邻居看",v:"interpersonal"}]},
+    {q:"模仿外语或方言时？", opts:[{t:"发音语调极其神似",v:"linguistic"},{t:"当成一种旋律来玩",v:"musical"},{t:"专注听其中的规律",v:"logical"}]},
+    {q:"植物园中游玩时？", opts:[{t:"想去触摸叶子脉络",v:"natural"},{t:"记得弯弯绕绕的路",v:"spatial"},{t:"拉着小朋友一起观察",v:"interpersonal"}]},
+    {q:"感到生气委屈时？", opts:[{t:"用话表达不满理由",v:"linguistic"},{t:"躲进小帐篷独处",v:"intrapersonal"},{t:"用力跺脚或摔枕头",v:"kinesthetic"}]},
+    {q:"敲击餐具时的表现？", opts:[{t:"敲出好听的节奏",v:"musical"},{t:"观察水杯震动深度",v:"logical"},{t:"纯粹享受发力感",v:"kinesthetic"}]},
+    {q:"看到书中迷宫题？", opts:[{t:"用手指快速画出路径",v:"spatial"},{t:"问为什么出口在那",v:"logical"},{t:"给路上的障碍起名",v:"linguistic"}]},
+    {q:"看到别的小朋友哭？", opts:[{t:"上前安慰或拿玩具",v:"interpersonal"},{t:"观察他哭时的动作",v:"natural"},{t:"自己也感到悲伤躲避",v:"intrapersonal"}]}
+];
+
+const container = document.getElementById('questions-container');
+qData.forEach((d, i) => {
+    let div = document.createElement('div');
+    div.className = 'question';
+    div.innerHTML = `<p>${i+1}. ${d.q}</p><div class="options">${d.opts.map(o => `<label><input type="radio" name="q${i}" value="${o.v}"> ${o.t}</label>`).join('')}</div>`;
+    container.appendChild(div);
+});
+
+let charts = {};
+
+function generateReport() {
+    const radios = document.querySelectorAll('input[type="radio"]:checked');
+    if(radios.length < 30) { alert(`还差 ${30-radios.length} 题！`); return; }
+    
+    let s = { linguistic:0, logical:0, spatial:0, musical:0, kinesthetic:0, natural:0, interpersonal:0, intrapersonal:0 };
+    radios.forEach(r => s[r.value]++);
+
+    const results = {
+        linguistic: ["小小演说家", "https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=500", "词汇库充沛，理解力超前。", "多读书，支持他给玩偶讲故事。"],
+        logical: ["逻辑思想家", "https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=500", "对秩序、数理、因果极其敏感。", "引入编程积木，玩分类游戏。"],
+        spatial: ["视觉建模师", "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=500", "空间感知强，视觉记忆力好。", "多玩磁力片、乐高，鼓励绘画。"],
+        musical: ["乐感小精灵", "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=500", "听觉处理极其迅速，节奏感强。", "接触奥尔夫音乐，尝试打击乐。"],
+        kinesthetic: ["运动小名将", "https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?w=500", "身体控制能力强，触觉发达。", "平衡车、攀爬、手工制作。"],
+        natural: ["自然科考员", "https://images.unsplash.com/photo-1501183007986-d0d080b147f9?w=500", "热爱生命，对环境细节敏感。", "多去户外捡拾标本，养殖小植物。"],
+        interpersonal: ["社交小领袖", "https://images.unsplash.com/photo-1491153041158-9444ddee6344?w=500", "共情力高，擅长读懂他人。", "多参加团队活动，玩角色扮演。"],
+        intrapersonal: ["深度专注者", "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=500", "自我意识清晰，独立性强。", "尊重独处时间，给予选择权。"]
+    };
+
+    const top = Object.keys(s).sort((a,b) => s[b]-s[a])[0];
+    document.getElementById('res-title').innerText = "测评结论：天生的【" + results[top][0] + "】";
+    document.getElementById('res-img').innerHTML = `<img src="${results[top][1]}">`;
+    document.getElementById('res-desc').innerText = results[top][2];
+    document.getElementById('res-advice').innerText = results[top][3];
+
+    const labels = ['语言表达', '数理逻辑', '空间视觉', '音乐艺术', '身体动觉', '自然观察', '社交共情', '个人内省'];
+    const values = [s.linguistic, s.logical, s.spatial, s.musical, s.kinesthetic, s.natural, s.interpersonal, s.intrapersonal];
+
+    // 评级逻辑
+    const getLevel = (v) => {
+        if (v >= 7) return '擅长';
+        if (v >= 4) return '有点擅长';
+        if (v >= 2) return '不太擅长';
+        return '不擅长';
+    };
+
+    if(charts.radar) charts.radar.destroy();
+    if(charts.bar) charts.bar.destroy();
+
+    // 绘制雷达图
+    charts.radar = new Chart(document.getElementById('radarChart'), {
+        type: 'radar',
+        data: { labels: labels, datasets: [{ label:'倾向分', data: values, backgroundColor: 'rgba(255, 118, 117, 0.2)', borderColor: 'rgba(255, 118, 117, 1)', borderWidth: 3 }] },
+        options: { scales: { r: { suggestMin: 0, ticks: { display: false } } } }
+    });
+
+    // 绘制横向条形图
+    charts.bar = new Chart(document.getElementById('barChart'), {
+        type: 'bar',
+        data: { 
+            labels: labels, 
+            datasets: [{ 
+                data: values, 
+                backgroundColor: values.map(v => v >= 7 ? '#55E6C1' : v >= 4 ? '#74B9FF' : '#DCDDE1'),
+                borderRadius: 5
+            }] 
+        },
+        options: { 
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { 
+                legend: { display: false },
+                tooltip: { callbacks: { label: (ctx) => `得分: ${ctx.parsed.x} | 评级: ${getLevel(ctx.parsed.x)}` } }
+            },
+            scales: { x: { suggestMax: 10, grid: { display: false } } }
+        },
+        plugins: [{
+            afterDatasetsDraw(chart) {
+                const {ctx, data, scales: {y}} = chart;
+                ctx.font = 'bold 12px sans-serif'; ctx.fillStyle = '#666'; ctx.textAlign = 'left';
+                data.datasets[0].data.forEach((val, i) => {
+                    ctx.fillText(getLevel(val), chart.getDatasetMeta(0).data[i].x + 10, y.getPixelForValue(i) + 5);
+                })
+            }
+        }]
+    });
+
+    document.getElementById('report').style.display = 'block';
+    window.scrollTo({ top: document.getElementById('report').offsetTop, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

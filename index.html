@@ -75,12 +75,12 @@
         <div class="image-box" id="res-img"></div>
         
         <div class="chart-card">
-            <div class="chart-title">📊 天赋分布图</div>
+            <div class="chart-title">📊 潜力分布图</div>
             <canvas id="radarChart"></canvas>
         </div>
 
         <div class="chart-card" style="height: 450px;">
-            <div class="chart-title">📈 各项天赋分析</div>
+            <div class="chart-title">📈 各项潜力分析</div>
             <canvas id="barChart"></canvas>
         </div>
 
@@ -118,21 +118,21 @@ if (localStorage.getItem('is_verified') === 'true') {
 
 // 2. 30道深度题库
 const qData = [
-    {q:"独自玩耍时最常见的状态是？", opts:[{t:"跟玩偶演戏说话",v:"linguistic"},{t:"拆解研究玩具结构",v:"logical"},{t:"专注涂鸦或绘本",v:"spatial"}]},
-    {q:"听到快节奏音乐时的反应？", opts:[{t:"寻找声音来源",v:"musical"},{t:"手舞足蹈跳动",v:"kinesthetic"},{t:"模仿歌词发音",v:"linguistic"}]},
-    {q:"在公园路口迷路时孩子会？", opts:[{t:"指出回家的路",v:"spatial"},{t:"观察昆虫花朵",v:"natural"},{t:"找小朋友玩",v:"interpersonal"}]},
-    {q:"想吃某种水果时如何表达？", opts:[{t:"形容颜色味道",v:"linguistic"},{t:"拉你去果篮指认",v:"kinesthetic"},{t:"讲理由说服你",v:"logical"}]},
+    {q:"独自玩耍时最多见的状态是？", opts:[{t:"跟玩偶演戏说话",v:"linguistic"},{t:"拆解研究玩具结构",v:"logical"},{t:"专注涂鸦或绘本",v:"spatial"}]},
+    {q:"听到快节奏音乐时多见的第一反应？", opts:[{t:"寻找声音来源",v:"musical"},{t:"手舞足蹈跳动",v:"kinesthetic"},{t:"模仿歌词发音",v:"linguistic"}]},
+    {q:"在公园路口迷路时孩子会？", opts:[{t:"努力找回家的路",v:"spatial"},{t:"去看路边昆虫花朵",v:"natural"},{t:"找有小朋友玩的路",v:"interpersonal"}]},
+    {q:"想吃某种水果时如何表达？", opts:[{t:"形容颜色味道，如甜甜的苹果",v:"linguistic"},{t:"拉你去果篮指认",v:"kinesthetic"},{t:"讲理由说服你，如因为我乖，给我吃苹果",v:"logical"}]},
     {q:"积木倒塌后的反应？", opts:[{t:"默默重搭",v:"intrapersonal"},{t:"呼唤家长帮忙",v:"interpersonal"},{t:"检查为什么倒",v:"logical"}]},
     {q:"对家中物品变动的反应？", opts:[{t:"一眼发现指出来",v:"spatial"},{t:"只看自己东西在不在",v:"logical"},{t:"表现出焦虑感",v:"intrapersonal"}]},
     {q:"涂鸦完之后的行为？", opts:[{t:"解释画里的故事",v:"linguistic"},{t:"说像什么具体形状",v:"spatial"},{t:"享受笔划在纸上的力道",v:"kinesthetic"}]},
     {q:"模仿大人扫地或打电话？", opts:[{t:"动作协调准确",v:"kinesthetic"},{t:"表情神态模仿极像",v:"interpersonal"},{t:"关注使用的顺序",v:"logical"}]},
     {q:"在沙坑或玩水时的表现？", opts:[{t:"观察触感和细节",v:"natural"},{t:"重复接水倒水实验",v:"logical"},{t:"尝试做出造型",v:"spatial"}]},
-    {q:"听到特殊声音的反应？", opts:[{t:"能哼出节奏旋律",v:"musical"},{t:"分辨是哪种动物",v:"natural"},{t:"记住新词汇",v:"linguistic"}]},
+    {q:"听到特殊声音的反应？", opts:[{t:"能哼出节奏旋律",v:"musical"},{t:"分辨是哪种动物",v:"natural"},{t:"学习并记住新词汇",v:"linguistic"}]},
     {q:"整理玩具时的习惯？", opts:[{t:"按分类摆放",v:"logical"},{t:"必须放在特定位置",v:"intrapersonal"},{t:"邀你一起整理讨论",v:"interpersonal"}]},
     {q:"到新游乐场的表现？", opts:[{t:"主动找小伙伴",v:"interpersonal"},{t:"直奔大型器械",v:"kinesthetic"},{t:"在旁观察确定安全",v:"intrapersonal"}]},
     {q:"对数字或数量的反应？", opts:[{t:"爱念电梯数字",v:"logical"},{t:"随旋律数数",v:"musical"},{t:"一眼看出谁的糖多",v:"spatial"}]},
     {q:"分享今天发生的事时？", opts:[{t:"情节清晰连贯",v:"linguistic"},{t:"观察大人脸色反应",v:"interpersonal"},{t:"手舞足蹈演示",v:"kinesthetic"}]},
-    {q:"对下雨或小蚂蚁的态度？", opts:[{t:"共情想去照顾",v:"natural"},{t:"问为什么会下雨",v:"logical"},{t:"给蚂蚁起名字",v:"linguistic"}]},
+    {q:"对下雨或小狗的态度？", opts:[{t:"共情想去照顾",v:"natural"},{t:"问为什么会下雨",v:"logical"},{t:"给小狗起名字",v:"linguistic"}]},
     {q:"玩磁力片或拼图时？", opts:[{t:"三维构思能力强",v:"spatial"},{t:"先分类再拼装",v:"logical"},{t:"喜欢推倒的感觉",v:"kinesthetic"}]},
     {q:"遇到重复规律时的反应？", opts:[{t:"发现规律并尝试接龙",v:"logical"},{t:"对重复旋律着迷",v:"musical"},{t:"必须维持仪式感",v:"intrapersonal"}]},
     {q:"穿衣服时的表现？", opts:[{t:"协调性好爱自己穿",v:"kinesthetic"},{t:"对颜色图案很挑剔",v:"spatial"},{t:"只穿特定的衣服",v:"intrapersonal"}]},

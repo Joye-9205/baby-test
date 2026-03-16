@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>3-4岁幼儿潜力深度测评</title>
+    <title>3-4岁幼儿潜力深度测评 - 专业增强版</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #FF7675;
             --secondary: #74B9FF;
-            --success: #55E6C1;
-            --accent: #A29BFE;
+            --success: #00B894;
             --text-main: #2D3436;
             --text-sub: #636E72;
-            --glass: rgba(255, 255, 255, 0.9);
+            --glass: rgba(255, 255, 255, 0.95);
         }
 
         * { box-sizing: border-box; -webkit-font-smoothing: antialiased; user-select: none; }
@@ -41,7 +40,6 @@
             margin: 30px 0; font-size: 22px; text-align: center; outline: none;
             transition: all 0.3s; background: #F8F9FA; letter-spacing: 4px;
         }
-        .auth-box input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(255,118,117,0.1); }
         .auth-box button {
             width: 100%; padding: 18px; background: var(--primary); color: white;
             border: none; border-radius: 18px; font-size: 18px; font-weight: bold;
@@ -62,11 +60,7 @@
         .badge { display: inline-block; padding: 4px 12px; background: rgba(255,118,117,0.1); color: var(--primary); border-radius: 8px; font-size: 12px; margin-top: 10px; font-weight: 600; }
 
         /* 题目设计 */
-        .question {
-            margin-bottom: 25px; padding: 25px; border-radius: 28px;
-            background: white; border: 1px solid #F1F2F6;
-            transition: transform 0.3s;
-        }
+        .question { margin-bottom: 25px; padding: 25px; border-radius: 28px; background: white; border: 1px solid #F1F2F6; }
         .question p { font-weight: 700; margin-bottom: 18px; font-size: 17px; color: #333; }
         .options label {
             display: block; margin: 12px 0; padding: 16px 20px;
@@ -74,8 +68,8 @@
             font-size: 15px; cursor: pointer; transition: all 0.2s; position: relative;
         }
         input[type="radio"] { display: none; }
-        input[type="radio"]:checked + span { color: var(--primary); font-weight: 600; }
         .options label:has(input:checked) { border-color: var(--primary); background: #FFF9F9; box-shadow: 0 4px 12px rgba(255,118,117,0.08); }
+        input[type="radio"]:checked + span { color: var(--primary); font-weight: 600; }
 
         .btn-submit {
             width: 100%; padding: 22px; background: linear-gradient(135deg, #FF7675, #FF9F9E);
@@ -84,12 +78,11 @@
             box-shadow: 0 15px 30px rgba(255,118,117,0.3);
         }
 
-        
+        /* 报告优化 */
         #report { display: none; margin-top: 50px; animation: fadeIn 0.8s ease; }
         .report-card { background: white; border-radius: 30px; padding: 30px; margin-bottom: 25px; border: 1px solid #F1F2F6; }
-        
-        .res-headline { text-align: center; margin-bottom: 30px; }
-        .res-headline h2 { font-size: 32px; color: var(--primary); margin: 5px 0; }
+        .res-headline { text-align: center; }
+        .res-headline h2 { font-size: 32px; color: var(--primary); margin: 10px 0; }
         
         .section-title { 
             display: flex; align-items: center; font-size: 18px; font-weight: 800; 
@@ -97,13 +90,24 @@
         }
         .section-title::before { content: ""; width: 6px; height: 20px; background: var(--primary); border-radius: 3px; margin-right: 12px; }
 
-        .analysis-text { color: var(--text-sub); font-size: 15px; line-height: 1.8; text-align: justify; }
-        .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
-        .tag { padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; }
-        .tag-p { background: rgba(255,118,117,0.1); color: var(--primary); }
-        .tag-s { background: rgba(116,185,255,0.1); color: var(--secondary); }
+        /* 雷达图放大优化 */
+        .radar-box { height: 480px; width: 100%; margin: 10px auto; position: relative; }
 
-        .advice-item { background: #F8F9FA; padding: 15px; border-radius: 15px; margin-bottom: 12px; font-size: 14px; border-left: 4px solid var(--secondary); }
+        /* 天赋分级模块 */
+        .level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; }
+        .level-card { 
+            padding: 15px; border-radius: 20px; background: #F8F9FA; 
+            border: 1px solid #F1F2F6; display: flex; flex-direction: column;
+        }
+        .lvl-title { font-size: 14px; color: var(--text-sub); font-weight: 600; margin-bottom: 6px; }
+        .lvl-status { font-size: 13px; font-weight: 800; display: inline-block; padding: 2px 8px; border-radius: 6px; width: fit-content; }
+        .lvl-best { background: #E3FCEF; color: #00B894; }
+        .lvl-potential { background: #E3F2FD; color: #0984E3; }
+        .lvl-normal { background: #F1F2F6; color: #B2BEC3; }
+
+        .analysis-text { color: var(--text-sub); font-size: 15px; line-height: 1.8; text-align: justify; }
+        .tag-p { background: rgba(255,118,117,0.1); color: var(--primary); padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; margin: 2px; }
+        .advice-item { background: #F8FBFF; padding: 15px; border-radius: 15px; margin-bottom: 12px; font-size: 14px; border-left: 4px solid var(--secondary); }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -112,28 +116,28 @@
 
 <div id="auth-overlay">
     <div class="auth-box">
-        <h2>🔒 授权访问</h2>
-        <div class="badge">请输入最新授权码开始测评</div>
+        <h2>幼儿天赋测评量表</h2>
+        <div class="badge">请输入最新授权码开始</div>
         <input type="password" id="auth-input" placeholder="输入授权码" inputmode="numeric">
-        <button id="auth-btn">解锁深度评估报告</button>
+        <button id="auth-btn">解锁天赋深度评估报告</button>
     </div>
 </div>
 
 <div id="main-content">
     <header>
         <h1>🌱 幼儿潜力深度测评</h1>
-        <div class="badge">3-4岁关键期专用,共30题预计需要5分钟</div>
-< div class = "徽章" > 3-4 岁关键期专用 </ div >  
+        <div class="badge">3-4岁关键期专用 · 共30题</div>
     </header>
 
     <div id="questions-container"></div>
-    <button class="btn-submit" onclick="generateReport()">查看潜力分析报告</button>
+    <button class="btn-submit" onclick="generateReport()">立即生成潜力分析报告</button>
+< 按钮 class = "btn-submit" onclick = " generateReport ( ) " >li j 生成潜力分析报告 </ 按钮 >  
 
     <div id="report">
         <div class="report-card res-headline">
             <span style="color:#A0A0A0; font-size:14px; letter-spacing:2px;">测评结果显示核心天赋为</span>
             <h2 id="res-title"></h2>
-            <div id="res-tags" class="tag-container" style="justify-content:center; margin-top:15px;"></div>
+            <div id="res-tags" class="tag-container" style="display:flex; justify-content:center; flex-wrap:wrap; margin-top:15px;"></div>
         </div>
 
         <div class="report-card">
@@ -142,12 +146,17 @@
         </div>
 
         <div class="report-card">
-            <div class="section-title">天赋深度解读</div>
+            <div class="section-title">各项天赋评价</div>
+            <div id="level-list" class="level-grid"></div>
+        </div>
+
+        <div class="report-card">
+            <div class="section-title">核心天赋解读</div>
             <div id="res-desc" class="analysis-text"></div>
         </div>
 
         <div class="report-card">
-            <div class="section-title">个性化培养策略</div>
+            <div class="section-title">培养建议方案</div>
             <div id="res-advice"></div>
         </div>
         
@@ -157,7 +166,7 @@
 
 <script>
 (function() {
-    
+    // change daily
     const _c = ["MDUyMA==", "bGluZ3Vpc3RpYw==", "bG9naWNhbA==", "c3BhdGlhbA==", "bXVzaWNhbA==", "a2luZXN0aGV0aWM=", "aW50ZXJwZXJzb25hbA=="];
     const d = (s) => atob(s);
 
@@ -171,6 +180,7 @@
         };
     };
 
+    
     const qData = [
         ["当孩子想表达需求时，是否能自如地更换词汇？（如：从'我想吃'变成'我肚子饿了'）", "经常如此，表达灵活自如", "偶尔变换，多数使用固定词汇", "直接指认，不喜欢用词", d(_c[1]), d(_c[6]), d(_c[5])],
         ["孩子是否能捕捉大人微妙的情绪变化？", "极其敏锐", "偶尔察觉", "完全不关注", d(_c[6]), d(_c[1]), d(_c[2])],
@@ -218,9 +228,10 @@
         });
     }
 
+    
     const dict = {
         linguistic: {
-            title: "卓越语言家 (Linguistic)",
+            title: "🎤卓越语言家 (Linguistic)",
             tags: ["语义敏感", "叙事天赋", "高迁移力"],
             desc: "您的孩子展现出超越同龄人的语言编码能力。这不仅体现在词汇储备量上，更重要的是‘语境重组’能力。他们善于捕捉语音中的情感色彩，并能精准地通过语言影响他人。这是阅读、写作以及跨文化沟通的天然基石。他们的大脑在处理语言符号时非常活跃，能够快速建立词汇与复杂情绪之间的关联。",
             advice: [
@@ -230,7 +241,7 @@
             ]
         },
         logical: {
-            title: "逻辑思想者 (Logical)",
+            title: "🔎逻辑思想者 (Logical)",
             tags: ["秩序感", "因果溯源", "策略萌芽"],
             desc: "您的孩子是一个天生的‘规则探寻者’。他们对世界如何运行充满了逻辑上的好奇。表现为极强的分类能力和对数字、比例的本能敏感。这种天赋预示着在数学、计算机科学以及系统化管理方面的潜力。他们更关注事物的内在关联，而非表面现象，具有极强的批判性思维雏形。",
             advice: [
@@ -240,7 +251,7 @@
             ]
         },
         spatial: {
-            title: "空间建模师 (Spatial)",
+            title: "🏠空间建模师 (Spatial)",
             tags: ["视觉渲染", "几何直觉", "方位感知"],
             desc: "您的孩子大脑中拥有一个强大的‘视觉显示卡’。他们能自如地在脑海中旋转物体、重构空间。这种能力在建筑设计、艺术创作、临床医学等领域至关重要。他们能从杂乱的视觉信号中提取核心特征，并对色彩与形态的和谐度有天然的感知力。",
             advice: [
@@ -250,7 +261,7 @@
             ]
         },
         musical: {
-            title: "旋律感知者 (Musical)",
+            title: "🎵旋律感知者 (Musical)",
             tags: ["绝对音感潜质", "节奏记忆", "情感共鸣"],
             desc: "孩子对声音信号有着极高的过滤与处理权重。他们能精准捕捉环境中的微小声学特征，并将其转化为内心的情感。这种天赋不仅仅关乎音乐创作，更代表了一种极佳的听觉学习能力和极强的同理心基石。他们往往能通过声音辨别他人的真实情绪状态。",
             advice: [
@@ -260,7 +271,7 @@
             ]
         },
         kinesthetic: {
-            title: "身心协作者 (Kinesthetic)",
+            title: "🧗身心协作者 (Kinesthetic)",
             tags: ["精准运动", "身体智慧", "触觉学习"],
             desc: "孩子具备极高的运动觉知能力。这意味着大脑对肌肉群的控制极其精细，且反馈周期极短。这是外科医生、专业运动员或精密制造专家的核心潜质。他们往往‘坐不住’，因为他们是通过身体接触和动作体验来处理信息的。触觉是他们认知的核心触角。",
             advice: [
@@ -283,7 +294,7 @@
 
     window.generateReport = function() {
         const sel = document.querySelectorAll('input[type="radio"]:checked');
-        if(sel.length < 30) { alert(`测评还差 ${30-sel.length} 题，请完成后再查看结果。`); return; }
+        if(sel.length < 30) { alert(`测评还差 ${30-sel.length} 题。`); return; }
         
         let s = { linguistic:0, logical:0, spatial:0, musical:0, kinesthetic:0, interpersonal:0 };
         sel.forEach(r => s[r.value]++);
@@ -294,26 +305,45 @@
         document.getElementById('res-title').innerText = res.title;
         document.getElementById('res-desc').innerText = res.desc;
         
-        // 渲染标签
+        
         const tagBox = document.getElementById('res-tags');
-        tagBox.innerHTML = '';
-        res.tags.forEach(t => {
-            const span = document.createElement('span');
-            span.className = 'tag tag-p';
-            span.innerText = t;
-            tagBox.appendChild(span);
-        });
+        tagBox.innerHTML = res.tags.map(t => `<span class="tag-p">${t}</span>`).join('');
 
-        // 渲染建议
+        
         const advBox = document.getElementById('res-advice');
         advBox.innerHTML = res.advice.map(a => `<div class="advice-item">${a}</div>`).join('');
 
-        // 渲染图表
+        
+        renderLevelList(s);
+        
         renderCharts(s);
 
         document.getElementById('report').style.display = 'block';
         window.scrollTo({ top: document.getElementById('report').offsetTop - 20, behavior: 'smooth' });
     };
+
+    function renderLevelList(scores) {
+        const container = document.getElementById('level-list');
+        const names = {
+            linguistic: '语言表达', logical: '数理逻辑', spatial: '空间视觉',
+            musical: '音乐律动', kinesthetic: '肢体运动', interpersonal: '人际社交'
+        };
+        container.innerHTML = '';
+        Object.keys(scores).forEach(key => {
+            const val = scores[key];
+            let levelClass = 'lvl-normal', levelText = '一般水平';
+            if(val >= 8) { levelClass = 'lvl-best'; levelText = '天赋极佳'; }
+            else if(val >= 5) { levelClass = 'lvl-potential'; levelText = '较有潜力'; }
+
+            const div = document.createElement('div');
+            div.className = 'level-card';
+            div.innerHTML = `
+                <span class="lvl-title">${names[key]}</span>
+                <span class="lvl-status ${levelClass}">${levelText}</span>
+            `;
+            container.appendChild(div);
+        });
+    }
 
     function renderCharts(s) {
         const labels = ['语言表达', '数理逻辑', '空间视觉', '音乐律动', '肢体运动', '人际社交'];
@@ -326,17 +356,32 @@
                 labels: labels,
                 datasets: [{
                     data: values,
-                    backgroundColor: 'rgba(255, 118, 117, 0.15)',
+                    backgroundColor: 'rgba(255, 118, 117, 0.25)',
                     borderColor: '#FF7675',
-                    borderWidth: 3,
+                    borderWidth: 4,
                     pointBackgroundColor: '#fff',
-                    pointBorderWidth: 2
+                    pointBorderColor: '#FF7675',
+                    pointBorderWidth: 3,
+                    pointRadius: 6
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: { r: { min: 0, max: 12, ticks: { display: false }, grid: { color: '#eee' }, angleLines: { color: '#eee' } } },
+                scales: {
+                    r: {
+                        min: 0, max: 12,
+                        beginAtZero: true,
+                        ticks: { stepSize: 2, display: false },
+                        grid: { color: 'rgba(0,0,0,0.06)', lineWidth: 1 },
+                        angleLines: { color: 'rgba(0,0,0,0.06)' },
+                        pointLabels: { 
+                            font: { size: 16, weight: '800' }, 
+                            color: '#2D3436',
+                            padding: 15
+                        }
+                    }
+                },
                 plugins: { legend: { display: false } }
             }
         });
